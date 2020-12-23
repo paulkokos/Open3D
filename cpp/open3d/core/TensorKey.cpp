@@ -34,6 +34,8 @@
 namespace open3d {
 namespace core {
 
+std::string TensorKey::ToString() const { return "bad"; }
+
 TensorKey TensorKey::Index(int64_t index) { return TensorKeyIndex(index); }
 
 TensorKey TensorKey::Slice(utility::optional<int64_t> start,
