@@ -34,112 +34,80 @@
 namespace open3d {
 namespace core {
 
-TensorKey TensorKey::Index(int64_t index) {
-    return TensorKey(TensorKeyMode::Index, index, None, None, None, Tensor());
-}
+TensorKey TensorKey::Index(int64_t index) { return TensorKeyIndex(index); }
 
 TensorKey TensorKey::Slice(utility::optional<int64_t> start,
                            utility::optional<int64_t> stop,
                            utility::optional<int64_t> step) {
-    return TensorKey(TensorKeyMode::Slice, 0, start, stop, step, Tensor());
+    return TensorKeySlice(start, stop, step);
 }
 
 TensorKey TensorKey::IndexTensor(const Tensor& index_tensor) {
-    return TensorKey(TensorKeyMode::IndexTensor, 0, None, None, None,
-                     index_tensor);
+    return TensorKeyIndexTensor(index_tensor);
 }
 
 TensorKey::TensorKeyMode TensorKey::GetMode() const { return mode_; }
 
 int64_t TensorKey::GetIndex() const {
-    AssertMode(TensorKeyMode::Index);
-    return index_;
+    if (const TensorKeyIndex* tk = dynamic_cast<const TensorKeyIndex*>(this)) {
+        return tk->GetIndex();
+    } else {
+        utility::LogError(
+                "TensorKey::GetIndex() is invalid since the TensorKey is not a "
+                "TensorKeyIndex instance.");
+    }
 }
 
 int64_t TensorKey::GetStart() const {
-    AssertMode(TensorKeyMode::Slice);
-    if (start_.has_value()) {
-        return start_.value();
+    if (const TensorKeySlice* tk = dynamic_cast<const TensorKeySlice*>(this)) {
+        return tk->GetStart();
     } else {
-        utility::LogError("TensorKeyMode::Slice: start is None.");
+        utility::LogError(
+                "TensorKey::GetStart() is invalid since the TensorKey is not a "
+                "TensorKeySlice instance.");
     }
 }
 
 int64_t TensorKey::GetStop() const {
-    AssertMode(TensorKeyMode::Slice);
-    if (stop_.has_value()) {
-        return stop_.value();
+    if (const TensorKeySlice* tk = dynamic_cast<const TensorKeySlice*>(this)) {
+        return tk->GetStop();
     } else {
-        utility::LogError("TensorKeyMode::Slice: stop is None.");
+        utility::LogError(
+                "TensorKey::GetStop() is invalid since the TensorKey is not a "
+                "TensorKeySlice instance.");
     }
 }
 
 int64_t TensorKey::GetStep() const {
-    AssertMode(TensorKeyMode::Slice);
-    if (step_.has_value()) {
-        return step_.value();
+    if (const TensorKeySlice* tk = dynamic_cast<const TensorKeySlice*>(this)) {
+        return tk->GetStep();
     } else {
-        utility::LogError("TensorKeyMode::Slice: step is None.");
+        utility::LogError(
+                "TensorKey::GetStep() is invalid since the TensorKey is not a "
+                "TensorKeySlice instance.");
+    }
+}
+
+TensorKey TensorKey::UpdateWithDimSize(int64_t dim_size) const {
+    if (const TensorKeySlice* tk = dynamic_cast<const TensorKeySlice*>(this)) {
+        return tk->UpdateWithDimSize(dim_size);
+    } else {
+        utility::LogError(
+                "TensorKey::UpdateWithDimSize() is invalid since the TensorKey "
+                "is not a TensorKeySlice instance.");
     }
 }
 
 std::shared_ptr<Tensor> TensorKey::GetIndexTensor() const {
-    AssertMode(TensorKeyMode::IndexTensor);
-    return index_tensor_;
-}
-
-TensorKey TensorKey::UpdateWithDimSize(int64_t dim_size) const {
-    AssertMode(TensorKeyMode::Slice);
-    return TensorKey(TensorKeyMode::Slice, 0,
-                     start_.has_value() ? start_.value() : 0,
-                     stop_.has_value() ? stop_.value() : dim_size,
-                     step_.has_value() ? step_.value() : 1, Tensor());
-}
-
-TensorKey::TensorKey(TensorKeyMode mode,
-                     int64_t index,
-                     utility::optional<int64_t> start,
-                     utility::optional<int64_t> stop,
-                     utility::optional<int64_t> step,
-                     const Tensor& index_tensor)
-    : mode_(mode),
-      index_(index),
-      start_(start),
-      stop_(stop),
-      step_(step),
-      index_tensor_(std::make_shared<Tensor>(index_tensor)) {}
-
-std::string TensorKey::ToString() const {
-    std::stringstream ss;
-    if (mode_ == TensorKeyMode::Index) {
-        ss << "TensorKey::Index(" << index_ << ")";
-    } else if (mode_ == TensorKeyMode::Slice) {
-        ss << "TensorKey::Slice(";
-        if (start_.has_value()) {
-            ss << start_.value();
-        } else {
-            ss << "None";
-        }
-        ss << ", ";
-        if (stop_.has_value()) {
-            ss << stop_.value();
-        } else {
-            ss << "None";
-        }
-        ss << ", ";
-        if (step_.has_value()) {
-            ss << step_.value();
-        } else {
-            ss << "None";
-        }
-        ss << ")";
-    } else if (mode_ == TensorKeyMode::IndexTensor) {
-        ss << "TensorKey::IndexTensor(" << index_tensor_->ToString() << ")";
+    if (const TensorKeyIndexTensor* tk =
+                dynamic_cast<const TensorKeyIndexTensor*>(this)) {
+        return tk->GetIndexTensor();
     } else {
-        utility::LogError("Wrong TensorKeyMode.");
+        utility::LogError(
+                "TensorKey::GetIndexTensor() is invalid since the TensorKey is "
+                "not a TensorKeyIndexTensor instance.");
     }
-    return ss.str();
-};
+}
 
 int64_t TensorKeyIndex::GetIndex() const { return index_; }
 
@@ -204,7 +172,6 @@ std::string TensorKeySlice::ToString() const {
 }
 
 std::shared_ptr<Tensor> TensorKeyIndexTensor::GetIndexTensor() const {
-    AssertMode(TensorKeyMode::IndexTensor);
     return index_tensor_;
 }
 
