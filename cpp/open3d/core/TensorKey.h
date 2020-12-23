@@ -71,39 +71,15 @@ public:
     static TensorKey IndexTensor(const Tensor& index_tensor);
 
     /// Getters will check the TensorKeyMode
-    TensorKeyMode GetMode() const { return mode_; }
+    TensorKeyMode GetMode() const;
 
-    int64_t GetIndex() const {
-        AssertMode(TensorKeyMode::Index);
-        return index_;
-    }
+    int64_t GetIndex() const;
 
-    int64_t GetStart() const {
-        AssertMode(TensorKeyMode::Slice);
-        if (start_.has_value()) {
-            return start_.value();
-        } else {
-            utility::LogError("TensorKeyMode::Slice: start is None.");
-        }
-    }
+    int64_t GetStart() const;
 
-    int64_t GetStop() const {
-        AssertMode(TensorKeyMode::Slice);
-        if (stop_.has_value()) {
-            return stop_.value();
-        } else {
-            utility::LogError("TensorKeyMode::Slice: stop is None.");
-        }
-    }
+    int64_t GetStop() const;
 
-    int64_t GetStep() const {
-        AssertMode(TensorKeyMode::Slice);
-        if (step_.has_value()) {
-            return step_.value();
-        } else {
-            utility::LogError("TensorKeyMode::Slice: step is None.");
-        }
-    }
+    int64_t GetStep() const;
 
     std::shared_ptr<Tensor> GetIndexTensor() const;
 

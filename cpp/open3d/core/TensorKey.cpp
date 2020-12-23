@@ -51,6 +51,40 @@ TensorKey TensorKey::IndexTensor(const Tensor& index_tensor) {
                      index_tensor);
 }
 
+TensorKey::TensorKeyMode TensorKey::GetMode() const { return mode_; }
+
+int64_t TensorKey::GetIndex() const {
+    AssertMode(TensorKeyMode::Index);
+    return index_;
+}
+
+int64_t TensorKey::GetStart() const {
+    AssertMode(TensorKeyMode::Slice);
+    if (start_.has_value()) {
+        return start_.value();
+    } else {
+        utility::LogError("TensorKeyMode::Slice: start is None.");
+    }
+}
+
+int64_t TensorKey::GetStop() const {
+    AssertMode(TensorKeyMode::Slice);
+    if (stop_.has_value()) {
+        return stop_.value();
+    } else {
+        utility::LogError("TensorKeyMode::Slice: stop is None.");
+    }
+}
+
+int64_t TensorKey::GetStep() const {
+    AssertMode(TensorKeyMode::Slice);
+    if (step_.has_value()) {
+        return step_.value();
+    } else {
+        utility::LogError("TensorKeyMode::Slice: step is None.");
+    }
+}
+
 std::shared_ptr<Tensor> TensorKey::GetIndexTensor() const {
     AssertMode(TensorKeyMode::IndexTensor);
     return index_tensor_;
