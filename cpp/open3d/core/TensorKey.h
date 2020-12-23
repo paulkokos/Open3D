@@ -151,9 +151,6 @@ class TensorKeySlice : public TensorKey {
           start_(start),
           stop_(stop),
           step_(step) {}
-    int64_t GetStart() const;
-    int64_t GetStop() const;
-    int64_t GetStep() const;
     /// When dim_size is know, convert the slice object such that
     /// start_is_none_ == stop_is_none_ == step_is_none_ == false
     /// E.g. if t.shape == (5,), t[:4]:
@@ -163,6 +160,9 @@ class TensorKeySlice : public TensorKey {
     ///      before compute: Slice(   1, None, None)
     ///      after compute : Slice(   1,    5,    1)
     TensorKey UpdateWithDimSize(int64_t dim_size) const;
+    int64_t GetStart() const;
+    int64_t GetStop() const;
+    int64_t GetStep() const;
     std::string ToString() const override;
 
 protected:
