@@ -156,6 +156,15 @@ protected:
               bool step_is_none,
               const Tensor& index_tensor);
 
+    /// The fully specified constructor shall not be called directly. Use the
+    /// factory functions instead.
+    TensorKey(TensorKeyMode mode,
+              int64_t index,
+              utility::optional<int64_t> start,
+              utility::optional<int64_t> stop,
+              utility::optional<int64_t> step,
+              const Tensor& index_tensor);
+
     void AssertMode(TensorKeyMode mode) const {
         if (mode != mode_) {
             utility::LogError("Wrong TensorKeyMode.");

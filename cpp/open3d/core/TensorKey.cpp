@@ -107,6 +107,19 @@ TensorKey::TensorKey(TensorKeyMode mode,
     }
 }
 
+TensorKey::TensorKey(TensorKeyMode mode,
+                     int64_t index,
+                     utility::optional<int64_t> start,
+                     utility::optional<int64_t> stop,
+                     utility::optional<int64_t> step,
+                     const Tensor& index_tensor)
+    : mode_(mode),
+      index_(index),
+      start_(start),
+      stop_(stop),
+      step_(step),
+      index_tensor_(std::make_shared<Tensor>(index_tensor)) {}
+
 std::string TensorKey::ToString() const {
     std::stringstream ss;
     if (mode_ == TensorKeyMode::Index) {
