@@ -141,5 +141,41 @@ std::string TensorKey::ToString() const {
     return ss.str();
 };
 
+std::string TensorKeyIndex::ToString() const {
+    std::stringstream ss;
+    ss << "TensorKey::Index(" << index_ << ")";
+    return ss.str();
+}
+
+std::string TensorKeySlice::ToString() const {
+    std::stringstream ss;
+    ss << "TensorKey::Slice(";
+    if (start_.has_value()) {
+        ss << start_.value();
+    } else {
+        ss << "None";
+    }
+    ss << ", ";
+    if (stop_.has_value()) {
+        ss << stop_.value();
+    } else {
+        ss << "None";
+    }
+    ss << ", ";
+    if (step_.has_value()) {
+        ss << step_.value();
+    } else {
+        ss << "None";
+    }
+    ss << ")";
+    return ss.str();
+}
+
+std::string TensorKeyIndexTensor::ToString() const {
+    std::stringstream ss;
+    ss << "TensorKey::IndexTensor(" << index_tensor_->ToString() << ")";
+    return ss.str();
+}
+
 }  // namespace core
 }  // namespace open3d

@@ -129,5 +129,17 @@ protected:
     std::shared_ptr<Tensor> index_tensor_;
 };
 
+class TensorKeyIndex : public TensorKey {
+    std::string ToString() const;
+};
+
+class TensorKeySlice : public TensorKey {
+    std::string ToString() const;
+};
+
+class TensorKeyIndexTensor : public TensorKey {
+    std::string ToString() const;
+};
+
 }  // namespace core
 }  // namespace open3d
