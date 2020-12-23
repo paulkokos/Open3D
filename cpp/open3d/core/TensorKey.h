@@ -139,7 +139,6 @@ protected:
     /// Depending on the mode, some properties may or may not be used.
     TensorKeyMode mode_;
 
-public:
     /// Properties for TensorKeyMode::Index.
     int64_t index_ = 0;
 
