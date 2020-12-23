@@ -37,22 +37,18 @@ namespace core {
 utility::nullopt_t None = utility::nullopt;
 
 TensorKey TensorKey::Index(int64_t index) {
-    return TensorKey(TensorKeyMode::Index, index, 0, 0, 0, false, false, false,
-                     Tensor());
+    return TensorKey(TensorKeyMode::Index, index, None, None, None, Tensor());
 }
 
 TensorKey TensorKey::Slice(utility::optional<int64_t> start,
                            utility::optional<int64_t> stop,
                            utility::optional<int64_t> step) {
-    return Slice(start.has_value() ? start.value() : 0,
-                 stop.has_value() ? stop.value() : 0,
-                 step.has_value() ? step.value() : 0, !start.has_value(),
-                 !stop.has_value(), !step.has_value());
+    return TensorKey(TensorKeyMode::Slice, 0, start, stop, step, Tensor());
 }
 
 TensorKey TensorKey::IndexTensor(const Tensor& index_tensor) {
-    return TensorKey(TensorKeyMode::IndexTensor, 0, 0, 0, 0, false, false,
-                     false, index_tensor);
+    return TensorKey(TensorKeyMode::IndexTensor, 0, None, None, None,
+                     index_tensor);
 }
 
 std::shared_ptr<Tensor> TensorKey::GetIndexTensor() const {
@@ -62,49 +58,10 @@ std::shared_ptr<Tensor> TensorKey::GetIndexTensor() const {
 
 TensorKey TensorKey::UpdateWithDimSize(int64_t dim_size) const {
     AssertMode(TensorKeyMode::Slice);
-    return TensorKey(
-            TensorKeyMode::Slice, 0, StartIsNone() ? 0 : start_.value(),
-            StopIsNone() ? dim_size : stop_.value(),
-            StepIsNone() ? 1 : step_.value(), false, false, false, Tensor());
-}
-
-TensorKey TensorKey::Slice(int64_t start,
-                           int64_t stop,
-                           int64_t step,
-                           bool start_is_none,
-                           bool stop_is_none,
-                           bool step_is_none) {
-    return TensorKey(TensorKeyMode::Slice, 0, start, stop, step, start_is_none,
-                     stop_is_none, step_is_none, Tensor());
-}
-
-TensorKey::TensorKey(TensorKeyMode mode,
-                     int64_t index,
-                     int64_t start,
-                     int64_t stop,
-                     int64_t step,
-                     bool start_is_none,
-                     bool stop_is_none,
-                     bool step_is_none,
-                     const Tensor& index_tensor)
-    : mode_(mode),
-      index_(index),
-      index_tensor_(std::make_shared<Tensor>(index_tensor)) {
-    if (start_is_none) {
-        start_ = utility::nullopt;
-    } else {
-        start_ = start;
-    }
-    if (stop_is_none) {
-        stop_ = utility::nullopt;
-    } else {
-        stop_ = stop;
-    }
-    if (step_is_none) {
-        step_ = utility::nullopt;
-    } else {
-        step_ = step;
-    }
+    return TensorKey(TensorKeyMode::Slice, 0,
+                     StartIsNone() ? 0 : start_.value(),
+                     StopIsNone() ? dim_size : stop_.value(),
+                     StepIsNone() ? 1 : step_.value(), Tensor());
 }
 
 TensorKey::TensorKey(TensorKeyMode mode,

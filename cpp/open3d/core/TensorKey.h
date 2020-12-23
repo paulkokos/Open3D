@@ -132,30 +132,10 @@ public:
     ///      after compute : Slice(   1,    5,    1)
     TensorKey UpdateWithDimSize(int64_t dim_size) const;
 
-    /// The fully specifiec slice factory shall not be called directly.
-    static TensorKey Slice(int64_t start,
-                           int64_t stop,
-                           int64_t step,
-                           bool start_is_none,
-                           bool stop_is_none,
-                           bool step_is_none);
-
     /// String representation of the TensorKey.
     std::string ToString() const;
 
 protected:
-    /// The fully specified constructor shall not be called directly. Use the
-    /// factory functions instead.
-    TensorKey(TensorKeyMode mode,
-              int64_t index,
-              int64_t start,
-              int64_t stop,
-              int64_t step,
-              bool start_is_none,
-              bool stop_is_none,
-              bool step_is_none,
-              const Tensor& index_tensor);
-
     /// The fully specified constructor shall not be called directly. Use the
     /// factory functions instead.
     TensorKey(TensorKeyMode mode,
