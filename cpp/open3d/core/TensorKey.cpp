@@ -59,9 +59,9 @@ std::shared_ptr<Tensor> TensorKey::GetIndexTensor() const {
 TensorKey TensorKey::UpdateWithDimSize(int64_t dim_size) const {
     AssertMode(TensorKeyMode::Slice);
     return TensorKey(TensorKeyMode::Slice, 0,
-                     StartIsNone() ? 0 : start_.value(),
-                     StopIsNone() ? dim_size : stop_.value(),
-                     StepIsNone() ? 1 : step_.value(), Tensor());
+                     start_.has_value() ? start_.value() : 0,
+                     stop_.has_value() ? stop_.value() : dim_size,
+                     step_.has_value() ? step_.value() : 1, Tensor());
 }
 
 TensorKey::TensorKey(TensorKeyMode mode,
@@ -83,22 +83,22 @@ std::string TensorKey::ToString() const {
         ss << "TensorKey::Index(" << index_ << ")";
     } else if (mode_ == TensorKeyMode::Slice) {
         ss << "TensorKey::Slice(";
-        if (StartIsNone()) {
-            ss << "None";
-        } else {
+        if (start_.has_value()) {
             ss << start_.value();
+        } else {
+            ss << "None";
         }
         ss << ", ";
-        if (StopIsNone()) {
-            ss << "None";
-        } else {
+        if (stop_.has_value()) {
             ss << stop_.value();
+        } else {
+            ss << "None";
         }
         ss << ", ";
-        if (StepIsNone()) {
-            ss << "None";
-        } else {
+        if (step_.has_value()) {
             ss << step_.value();
+        } else {
+            ss << "None";
         }
         ss << ")";
     } else if (mode_ == TensorKeyMode::IndexTensor) {

@@ -80,44 +80,29 @@ public:
 
     int64_t GetStart() const {
         AssertMode(TensorKeyMode::Slice);
-        if (StartIsNone()) {
-            utility::LogError("TensorKeyMode::Slice: start is None.");
-        } else {
+        if (start_.has_value()) {
             return start_.value();
+        } else {
+            utility::LogError("TensorKeyMode::Slice: start is None.");
         }
     }
 
     int64_t GetStop() const {
         AssertMode(TensorKeyMode::Slice);
-        if (StopIsNone()) {
-            utility::LogError("TensorKeyMode::Slice: stop is None.");
-        } else {
+        if (stop_.has_value()) {
             return stop_.value();
+        } else {
+            utility::LogError("TensorKeyMode::Slice: stop is None.");
         }
     }
 
     int64_t GetStep() const {
         AssertMode(TensorKeyMode::Slice);
-        if (StepIsNone()) {
-            utility::LogError("TensorKeyMode::Slice: step is None.");
-        } else {
+        if (step_.has_value()) {
             return step_.value();
+        } else {
+            utility::LogError("TensorKeyMode::Slice: step is None.");
         }
-    }
-
-    bool StartIsNone() const {
-        AssertMode(TensorKeyMode::Slice);
-        return !start_.has_value();
-    }
-
-    bool StopIsNone() const {
-        AssertMode(TensorKeyMode::Slice);
-        return !stop_.has_value();
-    }
-
-    bool StepIsNone() const {
-        AssertMode(TensorKeyMode::Slice);
-        return !step_.has_value();
     }
 
     std::shared_ptr<Tensor> GetIndexTensor() const;
