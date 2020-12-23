@@ -32,8 +32,10 @@
 namespace open3d {
 namespace core {
 
-class Tensor;  // Avoids circular include
+// Avoids circular include.
+class Tensor;
 
+// Alias for utility::nullopt. Provides a similar Python slicing API.
 extern utility::nullopt_t None;
 
 /// A class to represent one of:
