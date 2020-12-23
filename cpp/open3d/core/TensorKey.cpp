@@ -34,43 +34,20 @@
 namespace open3d {
 namespace core {
 
-NoneType None;
+utility::nullopt_t None = utility::nullopt;
 
 TensorKey TensorKey::Index(int64_t index) {
     return TensorKey(TensorKeyMode::Index, index, 0, 0, 0, false, false, false,
                      Tensor());
 }
 
-TensorKey TensorKey::Slice(int64_t start, int64_t stop, int64_t step) {
-    return Slice(start, stop, step, false, false, false);
-}
-
-TensorKey TensorKey::Slice(int64_t start, int64_t stop, NoneType step) {
-    return Slice(start, stop, 0, false, false, true);
-}
-
-TensorKey TensorKey::Slice(int64_t start, NoneType stop, int64_t step) {
-    return Slice(start, 0, step, false, true, false);
-}
-
-TensorKey TensorKey::Slice(int64_t start, NoneType stop, NoneType step) {
-    return Slice(start, 0, 0, false, true, true);
-}
-
-TensorKey TensorKey::Slice(NoneType start, int64_t stop, int64_t step) {
-    return Slice(0, stop, step, true, false, false);
-}
-
-TensorKey TensorKey::Slice(NoneType start, int64_t stop, NoneType step) {
-    return Slice(0, stop, 0, true, false, true);
-}
-
-TensorKey TensorKey::Slice(NoneType start, NoneType stop, int64_t step) {
-    return Slice(0, 0, step, true, true, false);
-}
-
-TensorKey TensorKey::Slice(NoneType start, NoneType stop, NoneType step) {
-    return Slice(0, 0, 0, true, true, true);
+TensorKey TensorKey::Slice(utility::optional<int64_t> start,
+                           utility::optional<int64_t> stop,
+                           utility::optional<int64_t> step) {
+    return Slice(start.has_value() ? start.value() : 0,
+                 stop.has_value() ? stop.value() : 0,
+                 step.has_value() ? step.value() : 0, !start.has_value(),
+                 !stop.has_value(), !step.has_value());
 }
 
 TensorKey TensorKey::IndexTensor(const Tensor& index_tensor) {

@@ -34,10 +34,7 @@ namespace core {
 
 class Tensor;  // Avoids circular include
 
-// TODO: refactor this to use utility::optional
-class NoneType {};
-
-extern NoneType None;
+extern utility::nullopt_t None;
 
 /// A class to represent one of:
 /// 1) tensor index
@@ -63,14 +60,9 @@ public:
 
     /// Construct an TensorKeyMode::Slice type TensorKey.
     /// E.g. b = a[0:100:2]
-    static TensorKey Slice(int64_t start, int64_t stop, int64_t step);
-    static TensorKey Slice(int64_t start, int64_t stop, NoneType step);
-    static TensorKey Slice(int64_t start, NoneType stop, int64_t step);
-    static TensorKey Slice(int64_t start, NoneType stop, NoneType step);
-    static TensorKey Slice(NoneType start, int64_t stop, int64_t step);
-    static TensorKey Slice(NoneType start, int64_t stop, NoneType step);
-    static TensorKey Slice(NoneType start, NoneType stop, int64_t step);
-    static TensorKey Slice(NoneType start, NoneType stop, NoneType step);
+    static TensorKey Slice(utility::optional<int64_t> start,
+                           utility::optional<int64_t> stop,
+                           utility::optional<int64_t> step);
 
     /// Construct an TensorKeyMode::IndexTensor type TensorKey (advanced
     /// indexing).
