@@ -27,6 +27,7 @@
 #pragma once
 
 #include "open3d/utility/Console.h"
+#include "open3d/utility/Optional.h"
 
 namespace open3d {
 namespace core {
@@ -85,32 +86,44 @@ public:
 
     int64_t GetStart() const {
         AssertMode(TensorKeyMode::Slice);
-        return start_;
+        if (StartIsNone()) {
+            utility::LogError("TensorKeyMode::Slice: start is None.");
+        } else {
+            return start_.value();
+        }
     }
 
     int64_t GetStop() const {
         AssertMode(TensorKeyMode::Slice);
-        return stop_;
+        if (StopIsNone()) {
+            utility::LogError("TensorKeyMode::Slice: stop is None.");
+        } else {
+            return stop_.value();
+        }
     }
 
     int64_t GetStep() const {
         AssertMode(TensorKeyMode::Slice);
-        return step_;
+        if (StepIsNone()) {
+            utility::LogError("TensorKeyMode::Slice: step is None.");
+        } else {
+            return step_.value();
+        }
     }
 
-    bool GetStartIsNone() const {
+    bool StartIsNone() const {
         AssertMode(TensorKeyMode::Slice);
-        return start_is_none_;
+        return !start_.has_value();
     }
 
-    bool GetStopIsNone() const {
+    bool StopIsNone() const {
         AssertMode(TensorKeyMode::Slice);
-        return stop_is_none_;
+        return !stop_.has_value();
     }
 
-    bool GetStepIsNone() const {
+    bool StepIsNone() const {
         AssertMode(TensorKeyMode::Slice);
-        return step_is_none_;
+        return !step_.has_value();
     }
 
     std::shared_ptr<Tensor> GetIndexTensor() const;
@@ -163,12 +176,9 @@ public:
     int64_t index_ = 0;
 
     /// Properties for TensorKeyMode::Slice.
-    int64_t start_ = 0;
-    int64_t stop_ = 0;
-    int64_t step_ = 0;
-    bool start_is_none_ = false;
-    bool stop_is_none_ = false;
-    bool step_is_none_ = false;
+    utility::optional<int64_t> start_ = utility::nullopt;
+    utility::optional<int64_t> stop_ = utility::nullopt;
+    utility::optional<int64_t> step_ = utility::nullopt;
 
     /// Properties for TensorKeyMode::IndexTensor.
     /// To avoid circular include, the pointer type is used. The index_tensor is

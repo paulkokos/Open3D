@@ -85,9 +85,10 @@ std::shared_ptr<Tensor> TensorKey::GetIndexTensor() const {
 
 TensorKey TensorKey::UpdateWithDimSize(int64_t dim_size) const {
     AssertMode(TensorKeyMode::Slice);
-    return TensorKey(TensorKeyMode::Slice, 0, start_is_none_ ? 0 : start_,
-                     stop_is_none_ ? dim_size : stop_,
-                     step_is_none_ ? 1 : step_, false, false, false, Tensor());
+    return TensorKey(
+            TensorKeyMode::Slice, 0, StartIsNone() ? 0 : start_.value(),
+            StopIsNone() ? dim_size : stop_.value(),
+            StepIsNone() ? 1 : step_.value(), false, false, false, Tensor());
 }
 
 TensorKey TensorKey::Slice(int64_t start,
@@ -111,13 +112,23 @@ TensorKey::TensorKey(TensorKeyMode mode,
                      const Tensor& index_tensor)
     : mode_(mode),
       index_(index),
-      start_(start),
-      stop_(stop),
-      step_(step),
-      start_is_none_(start_is_none),
-      stop_is_none_(stop_is_none),
-      step_is_none_(step_is_none),
-      index_tensor_(std::make_shared<Tensor>(index_tensor)) {}
+      index_tensor_(std::make_shared<Tensor>(index_tensor)) {
+    if (start_is_none) {
+        start_ = utility::nullopt;
+    } else {
+        start_ = start;
+    }
+    if (stop_is_none) {
+        stop_ = utility::nullopt;
+    } else {
+        stop_ = stop;
+    }
+    if (step_is_none) {
+        step_ = utility::nullopt;
+    } else {
+        step_ = step;
+    }
+}
 
 std::string TensorKey::ToString() const {
     std::stringstream ss;
@@ -125,22 +136,22 @@ std::string TensorKey::ToString() const {
         ss << "TensorKey::Index(" << index_ << ")";
     } else if (mode_ == TensorKeyMode::Slice) {
         ss << "TensorKey::Slice(";
-        if (start_is_none_) {
+        if (StartIsNone()) {
             ss << "None";
         } else {
-            ss << start_;
+            ss << start_.value();
         }
         ss << ", ";
-        if (stop_is_none_) {
+        if (StopIsNone()) {
             ss << "None";
         } else {
-            ss << stop_;
+            ss << stop_.value();
         }
         ss << ", ";
-        if (step_is_none_) {
+        if (StepIsNone()) {
             ss << "None";
         } else {
-            ss << step_;
+            ss << step_.value();
         }
         ss << ")";
     } else if (mode_ == TensorKeyMode::IndexTensor) {
