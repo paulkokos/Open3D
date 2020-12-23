@@ -34,8 +34,6 @@
 namespace open3d {
 namespace core {
 
-const utility::nullopt_t None = utility::nullopt;
-
 TensorKey TensorKey::Index(int64_t index) {
     return TensorKey(TensorKeyMode::Index, index, None, None, None, Tensor());
 }

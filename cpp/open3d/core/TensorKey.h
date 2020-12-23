@@ -35,8 +35,8 @@ namespace core {
 // Avoids circular include.
 class Tensor;
 
-// Alias for utility::nullopt. Provides a similar Python slicing API.
-extern const utility::nullopt_t None;
+// Same as utility::nullopt. Provides a similar Python slicing API.
+constexpr utility::nullopt_t None{utility::nullopt_t::init()};
 
 /// A class to represent one of:
 /// 1) tensor index
