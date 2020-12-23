@@ -141,10 +141,42 @@ std::string TensorKey::ToString() const {
     return ss.str();
 };
 
+int64_t TensorKeyIndex::GetIndex() const { return index_; }
+
 std::string TensorKeyIndex::ToString() const {
     std::stringstream ss;
     ss << "TensorKey::Index(" << index_ << ")";
     return ss.str();
+}
+
+int64_t TensorKeySlice::GetStart() const {
+    if (start_.has_value()) {
+        return start_.value();
+    } else {
+        utility::LogError("TensorKeyMode::Slice: start is None.");
+    }
+}
+
+int64_t TensorKeySlice::GetStop() const {
+    if (stop_.has_value()) {
+        return stop_.value();
+    } else {
+        utility::LogError("TensorKeyMode::Slice: stop is None.");
+    }
+}
+
+int64_t TensorKeySlice::GetStep() const {
+    if (step_.has_value()) {
+        return step_.value();
+    } else {
+        utility::LogError("TensorKeyMode::Slice: step is None.");
+    }
+}
+
+TensorKey TensorKeySlice::UpdateWithDimSize(int64_t dim_size) const {
+    return TensorKeySlice(start_.has_value() ? start_.value() : 0,
+                          stop_.has_value() ? stop_.value() : dim_size,
+                          step_.has_value() ? step_.value() : 1);
 }
 
 std::string TensorKeySlice::ToString() const {
@@ -169,6 +201,11 @@ std::string TensorKeySlice::ToString() const {
     }
     ss << ")";
     return ss.str();
+}
+
+std::shared_ptr<Tensor> TensorKeyIndexTensor::GetIndexTensor() const {
+    AssertMode(TensorKeyMode::IndexTensor);
+    return index_tensor_;
 }
 
 std::string TensorKeyIndexTensor::ToString() const {

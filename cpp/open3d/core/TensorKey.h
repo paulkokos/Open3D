@@ -54,6 +54,8 @@ constexpr utility::nullopt_t None{utility::nullopt_t::init()};
 /// ```
 class TensorKey {
 public:
+    virtual ~TensorKey() {}
+
     enum class TensorKeyMode { Index, Slice, IndexTensor };
 
     /// Construct an TensorKeyMode::Index type TensorKey.
@@ -81,8 +83,6 @@ public:
 
     int64_t GetStep() const;
 
-    std::shared_ptr<Tensor> GetIndexTensor() const;
-
     /// When dim_size is know, convert the slice object such that
     /// start_is_none_ == stop_is_none_ == step_is_none_ == false
     /// E.g. if t.shape == (5,), t[:4]:
@@ -93,8 +93,10 @@ public:
     ///      after compute : Slice(   1,    5,    1)
     TensorKey UpdateWithDimSize(int64_t dim_size) const;
 
+    std::shared_ptr<Tensor> GetIndexTensor() const;
+
     /// String representation of the TensorKey.
-    std::string ToString() const;
+    virtual std::string ToString() const;
 
 protected:
     /// The fully specified constructor shall not be called directly. Use the
@@ -105,6 +107,8 @@ protected:
               utility::optional<int64_t> stop,
               utility::optional<int64_t> step,
               const Tensor& index_tensor);
+
+    TensorKey(TensorKeyMode mode) : mode_(mode) {}
 
     void AssertMode(TensorKeyMode mode) const {
         if (mode != mode_) {
@@ -130,15 +134,54 @@ protected:
 };
 
 class TensorKeyIndex : public TensorKey {
-    std::string ToString() const;
+    TensorKeyIndex(int64_t index)
+        : TensorKey(TensorKeyMode::Index), index_(index) {}
+    int64_t GetIndex() const;
+    std::string ToString() const override;
+
+protected:
+    int64_t index_ = 0;
 };
 
 class TensorKeySlice : public TensorKey {
-    std::string ToString() const;
+    TensorKeySlice(utility::optional<int64_t> start,
+                   utility::optional<int64_t> stop,
+                   utility::optional<int64_t> step)
+        : TensorKey(TensorKeyMode::Slice),
+          start_(start),
+          stop_(stop),
+          step_(step) {}
+    int64_t GetStart() const;
+    int64_t GetStop() const;
+    int64_t GetStep() const;
+    /// When dim_size is know, convert the slice object such that
+    /// start_is_none_ == stop_is_none_ == step_is_none_ == false
+    /// E.g. if t.shape == (5,), t[:4]:
+    ///      before compute: Slice(None,    4, None)
+    ///      after compute : Slice(   0,    4,    1)
+    /// E.g. if t.shape == (5,), t[1:]:
+    ///      before compute: Slice(   1, None, None)
+    ///      after compute : Slice(   1,    5,    1)
+    TensorKey UpdateWithDimSize(int64_t dim_size) const;
+    std::string ToString() const override;
+
+protected:
+    utility::optional<int64_t> start_ = utility::nullopt;
+    utility::optional<int64_t> stop_ = utility::nullopt;
+    utility::optional<int64_t> step_ = utility::nullopt;
 };
 
 class TensorKeyIndexTensor : public TensorKey {
-    std::string ToString() const;
+    TensorKeyIndexTensor(const Tensor& index_tensor)
+        : TensorKey(TensorKeyMode::IndexTensor),
+          index_tensor_(std::make_shared<Tensor>(index_tensor)) {}
+    std::shared_ptr<Tensor> GetIndexTensor() const;
+    std::string ToString() const override;
+
+protected:
+    /// To avoid circular include, the pointer type is used. The index_tensor is
+    /// shallow-copied when the TensorKey constructor is called.
+    std::shared_ptr<Tensor> index_tensor_;
 };
 
 }  // namespace core
