@@ -44,7 +44,7 @@ YAPF_VER="0.30.0"
 SPHINX_VER=3.1.2
 SPHINX_RTD_VER=0.5.0
 NBSPHINX_VER=0.7.1
-PILLOW_VER=7.2.0
+MATPLOTLIB_VER=3.3.3
 
 OPEN3D_INSTALL_DIR=~/open3d_install
 OPEN3D_SOURCE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. >/dev/null 2>&1 && pwd)"
@@ -415,8 +415,13 @@ install_docs_dependencies() {
     echo Install Python dependencies for building docs
     which python
     python -V
-    python -m pip install -U -q "wheel==$WHEEL_VER" "pip==$PIP_VER" "Pillow==$PILLOW_VER" \
-        "sphinx==$SPHINX_VER" "sphinx-rtd-theme==$SPHINX_RTD_VER" "nbsphinx==$NBSPHINX_VER"
+    python -m pip install -U -q \
+        "wheel==$WHEEL_VER" \
+        "pip==$PIP_VER" \
+        "matplotlib==$MATPLOTLIB_VER" \
+        "sphinx==$SPHINX_VER" \
+        "sphinx-rtd-theme==$SPHINX_RTD_VER" \
+        "nbsphinx==$NBSPHINX_VER"
     # m2r needs a patch for sphinx 3
     # https://github.com/sphinx-doc/sphinx/issues/7420
     python -m pip install -U -q "git+https://github.com/intel-isl/m2r@dev#egg=m2r"
@@ -493,4 +498,34 @@ build_docs() {
     cd ../docs # To Open3D/docs
     python make_docs.py $DOC_ARGS --pyapi_rst=always --execute_notebooks=never --sphinx --doxygen
     set +x # Echo commands off
+}
+
+install_arm64_dependencies() {
+    apt-get update -q -y
+    apt-get install -y apt-utils build-essential git wget
+    apt-get install -y python3 python3-dev python3-pip python3-virtualenv
+    apt-get install -y xorg-dev libglu1-mesa-dev ccache
+    apt-get install -y libblas-dev liblapack-dev liblapacke-dev libssl-dev
+    apt-get install -y libsdl2-dev libc++-7-dev libc++abi-7-dev libxi-dev
+    apt-get install -y libudev-dev autoconf libtool # librealsense
+    apt-get install -y clang-7
+    update-alternatives --install /usr/bin/clang clang /usr/bin/clang-7 100
+    update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-7 100
+    update-alternatives --install /usr/bin/cc cc /usr/bin/clang 100
+    update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++ 100
+    /usr/sbin/update-ccache-symlinks
+    echo 'export PATH="/usr/lib/ccache:$PATH"' | tee -a ~/.bashrc
+    virtualenv --python=$(which python) ${HOME}/venv
+    source ${HOME}/venv/bin/activate
+    which python
+    python --version
+    pip install pytest=="$PYTEST_VER" -U
+    pip install wheel=="$WHEEL_VER" -U
+    # Get pre-compiled CMake
+    wget https://github.com/intel-isl/Open3D/releases/download/v0.11.0/cmake-3.18-aarch64.tar.gz
+    tar -xvf cmake-3.18-aarch64.tar.gz
+    cp -ar cmake-3.18-aarch64 ${HOME}
+    PATH=${HOME}/cmake-3.18-aarch64/bin:$PATH
+    which cmake
+    cmake --version
 }

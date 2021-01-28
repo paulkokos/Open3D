@@ -29,6 +29,9 @@
 #include "open3d/core/Tensor.h"
 #include "open3d/core/TensorKey.h"
 #include "open3d/utility/Optional.h"
+#ifdef _MSC_VER
+#pragma warning(disable : 4996)  // Use of [[deprecated]] feature
+#endif
 #include "pybind/core/core.h"
 #include "pybind/core/tensor_converter.h"
 #include "pybind/docstring.h"
@@ -46,18 +49,26 @@ static TensorKey ToTensorKey(const py::slice& key) {
     Py_ssize_t step;
     PySlice_Unpack(key.ptr(), &start, &stop, &step);
     PySliceObject* slice_key = reinterpret_cast<PySliceObject*>(key.ptr());
-    return TensorKey::Slice(static_cast<int64_t>(start),
-                            static_cast<int64_t>(stop),
-                            static_cast<int64_t>(step),
-                            py::detail::PyNone_Check(slice_key->start),
-                            py::detail::PyNone_Check(slice_key->stop),
-                            py::detail::PyNone_Check(slice_key->step));
+
+    utility::optional<int64_t> start_opt = None;
+    if (!py::detail::PyNone_Check(slice_key->start)) {
+        start_opt = static_cast<int64_t>(start);
+    }
+    utility::optional<int64_t> stop_opt = None;
+    if (!py::detail::PyNone_Check(slice_key->stop)) {
+        stop_opt = static_cast<int64_t>(stop);
+    }
+    utility::optional<int64_t> step_opt = None;
+    if (!py::detail::PyNone_Check(slice_key->step)) {
+        step_opt = static_cast<int64_t>(step);
+    }
+    return TensorKey::Slice(start_opt, stop_opt, step_opt);
 }
 
 static TensorKey ToTensorKey(const py::list& key) {
     Tensor key_tensor = PyTupleToTensor(key);
     if (key_tensor.GetDtype() != Dtype::Bool) {
-        key_tensor = key_tensor.To(Dtype::Int64, /*copy=*/false);
+        key_tensor = key_tensor.To(Dtype::Int64);
     }
     return TensorKey::IndexTensor(key_tensor);
 }
@@ -65,7 +76,7 @@ static TensorKey ToTensorKey(const py::list& key) {
 static TensorKey ToTensorKey(const py::tuple& key) {
     Tensor key_tensor = PyTupleToTensor(key);
     if (key_tensor.GetDtype() != Dtype::Bool) {
-        key_tensor = key_tensor.To(Dtype::Int64, /*copy=*/false);
+        key_tensor = key_tensor.To(Dtype::Int64);
     }
     return TensorKey::IndexTensor(key_tensor);
 }
@@ -80,8 +91,7 @@ static TensorKey ToTensorKey(const py::array& key) {
 
 static TensorKey ToTensorKey(const Tensor& key_tensor) {
     if (key_tensor.GetDtype() != Dtype::Bool) {
-        return TensorKey::IndexTensor(
-                key_tensor.To(Dtype::Int64, /*copy=*/false));
+        return TensorKey::IndexTensor(key_tensor.To(Dtype::Int64));
     } else {
         return TensorKey::IndexTensor(key_tensor);
     }
